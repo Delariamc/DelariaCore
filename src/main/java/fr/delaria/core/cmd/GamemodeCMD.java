@@ -1,37 +1,59 @@
 package fr.delaria.core.cmd;
 
 import fr.delaria.core.Core;
+import fr.sunderia.sunderiautils.commands.CommandInfo;
+import fr.sunderia.sunderiautils.commands.PluginCommand;
+import net.luckperms.api.cacheddata.Result;
+import net.luckperms.api.node.types.PrefixNode;
+import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.plugin.java.JavaPlugin;
 
-public class GamemodeCMD implements CommandExecutor {
+import java.util.Arrays;
+import java.util.concurrent.atomic.AtomicReference;
 
-    private Core core;
+@CommandInfo(name = "gamemode", aliases = {"gm"}, permission = "minecraft.command.gamemode")
+public class GamemodeCMD extends PluginCommand {
 
-    public GamemodeCMD(Core core){
-        this.core = core;
+    private final Core core;
+
+    public GamemodeCMD(JavaPlugin core) {
+        super(core);
+        if(!(core instanceof Core)) throw new UnsupportedOperationException("The plugin is not an instance of Core?");
+        this.core = (Core) core;
     }
 
     @Override
-    public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
-        String gamemode = args[1];
-        if (!(sender instanceof Player player) || !player.hasPermission("minecraft.command.gamemode") || args.length < 2) return true;
+    public void onCommand(Player player, String[] args) {
+        if (args.length > 2) return;
 
-        Player target = args.length == 2 ? player:Bukkit.getPlayer(args[2]);
+        AtomicReference<Player> target = new AtomicReference<>(player);
+        getArg(args, 1).ifPresent(s -> target.set(Bukkit.getPlayer(s)));
 
-        if (gamemode.equalsIgnoreCase("survie") || gamemode.equals("0")) target.setGameMode(GameMode.SURVIVAL);
-        if (gamemode.equalsIgnoreCase("creative") || gamemode.equals("1")) target.setGameMode(GameMode.CREATIVE);
-        if (gamemode.equalsIgnoreCase("aventure") || gamemode.equals("2")) target.setGameMode(GameMode.ADVENTURE);
-        if (gamemode.equalsIgnoreCase("spectator") || gamemode.equals("3")) target.setGameMode(GameMode.SPECTATOR);
-        player.sendMessage(core.getPrefix() + "§fMode de jeu §c"+ target.getGameMode() + "§fpour " + core.getLuckPerms().getGroupManager().getGroup(core.getLuckPerms().getUserManager().getUser(target.getName()).getPrimaryGroup()).getCachedData().getMetaData().queryPrefix());
-        if (target != player) {
-            target.sendMessage(core.getPrefix() + "§fMode de jeu §c"+ target.getGameMode() + "§fpour " + core.getLuckPerms().getGroupManager().getGroup(core.getLuckPerms().getUserManager().getUser(target.getName()).getPrimaryGroup()).getCachedData().getMetaData().queryPrefix());
+        GameMode gameMode = toGameMode(args[0]);
+        if(gameMode == null) return;
+        target.get().setGameMode(gameMode);
+        String formatted = "%s§fMode de jeu §c%s §fpour %s&r %s".formatted(core.getPrefix(), gameMode, ChatColor.translateAlternateColorCodes('&', core.getLuckPerms().getGroupManager().getGroup(core.getLuckPerms().getUserManager().getUser(target.get().getName()).getPrimaryGroup()).getCachedData().getMetaData().queryPrefix().result()), target.get().getName());
+        player.sendMessage(formatted);
+        if (target.get() != player) target.get().sendMessage(formatted);
+    }
+
+    private GameMode toGameMode(String str) {
+        if(str.equalsIgnoreCase("survie")) str = "SURVIVAL";
+        String finalStr = str;
+        return Arrays.stream(GameMode.values()).filter(gameMode -> gameMode.name().equals(finalStr.toUpperCase()) || gameMode.getValue() == parseInt(finalStr)).findFirst().orElse(null);
+    }
+
+    private int parseInt(String finalStr) {
+        try {
+            return Integer.parseInt(finalStr);
+        } catch (NumberFormatException e) {
+            return -1;
         }
-
-        return false;
     }
 }

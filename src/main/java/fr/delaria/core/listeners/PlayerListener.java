@@ -43,8 +43,7 @@ public class PlayerListener implements Listener {
     }
 
     public String playerOP(Player player){
-        User user = core.getLuckPerms().getUserManager().getUser(player.getName());
-        if (!player.isOp()){return "";}
+        if (!player.isOp()) return "";
         return "§7[§4OP§7]";
     }
 }
