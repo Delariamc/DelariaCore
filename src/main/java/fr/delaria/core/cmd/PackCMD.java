@@ -20,7 +20,7 @@ public class PackCMD extends PluginCommand {
 
     @Override
     public void onCommand(Player player, String[] args) {
-        player.setTexturePack("https://cdn.discordapp.com/attachments/1003357762991960223/1046533161485615277/k_cDelariaflPack_k.zip");
+        player.setResourcePack("https://cdn.discordapp.com/attachments/1003357762991960223/1046533161485615277/k_cDelariaflPack_k.zip");
         TextComponent textComponent = new TextComponent("§7[§cDelaria§fPack§7] §8»§f Si vous n'avez reçu aucune demande de Resource Pack, cliquez");
         textComponent.addExtra(new TextComponentBuilder(" §cici§f.").setClickAction(ClickEvent.Action.OPEN_URL,"https://cdn.discordapp.com/attachments/1003357762991960223/1046533161485615277/k_cDelariaflPack_k.zip").build());
         player.spigot().sendMessage(textComponent);

@@ -11,33 +11,28 @@ import org.bukkit.event.player.PlayerQuitEvent;
 
 public class PlayerListener implements Listener {
 
-    private Core core;
-
-    public PlayerListener(Core core){
-        this.core = core;
-    }
-
     @EventHandler
     public void onJoin(PlayerJoinEvent event) {
-        User user = core.getLuckPerms().getUserManager().getUser(event.getPlayer().getName());
+        User user = Core.get().getLuckPerms().getUserManager().getUser(event.getPlayer().getName());
 
-        event.getPlayer().setTexturePack("https://cdn.discordapp.com/attachments/1003357762991960223/1046533161485615277/k_cDelariaflPack_k.zip");
-        event.getPlayer().setPlayerListName(user.getCachedData().getMetaData().getPrefix()+" "+ event.getPlayer());
-        event.getPlayer().setPlayerListName(user.getCachedData().getMetaData().getPrefix().replace("&", "§") + " " + event.getPlayer().getName());
+        event.getPlayer().setResourcePack("https://cdn.discordapp.com/attachments/1003357762991960223/1046533161485615277/k_cDelariaflPack_k.zip");
+        //event.getPlayer().setPlayerListName(user.getCachedData().getMetaData().getPrefix()+" "+ event.getPlayer());
+        String prefix = user.getCachedData().getMetaData().getPrefix().replace("&", "§");
+        event.getPlayer().setPlayerListName(prefix + " " + event.getPlayer().getName());
         event.getPlayer().setPlayerListHeaderFooter("\n\n\n\nΩ","\n     §fdiscord.gg/delaria    ");
-        event.setJoinMessage("§a[+] " + user.getCachedData().getMetaData().getPrefix().replace("&", "§") + " " + event.getPlayer().getName());
+        event.setJoinMessage("§a[+] " + prefix + " " + event.getPlayer().getName());
     }
 
     @EventHandler
     public void onQuit(PlayerQuitEvent event) {
-        User user = core.getLuckPerms().getUserManager().getUser(event.getPlayer().getName());
+        User user = Core.get().getLuckPerms().getUserManager().getUser(event.getPlayer().getName());
 
         event.setQuitMessage("§c[-] " + user.getCachedData().getMetaData().getPrefix().replace("&", "§")+ " " + event.getPlayer().getName());
     }
 
     @EventHandler
     public void onChat(AsyncPlayerChatEvent event) {
-        User user = core.getLuckPerms().getUserManager().getUser(event.getPlayer().getName());
+        User user = Core.get().getLuckPerms().getUserManager().getUser(event.getPlayer().getName());
 
         event.setFormat(playerOP(event.getPlayer()) + user.getCachedData().getMetaData().getPrefix().replace("&","§") + " " +event.getPlayer().getName() +" §7↦ §f" + event.getMessage());
     }
