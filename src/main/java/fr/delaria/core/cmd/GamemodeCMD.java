@@ -11,7 +11,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicReference;
 
 @CommandInfo(name = "gamemode", aliases = {"gm"}, permission = "minecraft.command.gamemode")
 public class GamemodeCMD extends PluginCommand {
@@ -24,22 +23,19 @@ public class GamemodeCMD extends PluginCommand {
             .build();
 
     public GamemodeCMD(JavaPlugin core) {
-        super(core);
-        if(!(core instanceof Core)) throw new UnsupportedOperationException("The plugin is not an instance of Core?");
-        this.core = (Core) core;
+        super(Core.get());
+        this.core = Core.get();
     }
 
     @Override
     public void onCommand(Player player, String[] args) {
-        if (args.length > 2) return;
+        Player target = getArg(args, 1).map(Bukkit::getPlayer).orElse(player);
 
-        AtomicReference<Player> target = new AtomicReference<>(getArg(args, 1).map(Bukkit::getPlayer).orElse(player));
-
-        GameMode gameMode = gamemodes.get(args[0]);
+        GameMode gameMode = gamemodes.get(getArg(args, 0).orElse("4"));
         if (gameMode == null) return;
-        target.get().setGameMode(gameMode);
-        String formatted = "%s§fMode de jeu §c%s §fpour %s&r %s".formatted(core.getPrefix(), gameMode, ChatColor.translateAlternateColorCodes('&', core.getLuckPerms().getGroupManager().getGroup(core.getLuckPerms().getUserManager().getUser(target.get().getName()).getPrimaryGroup()).getCachedData().getMetaData().queryPrefix().result()), target.get().getName());
+        target.setGameMode(gameMode);
+        String formatted = "%s§fMode de jeu §c%s §fpour %s&r %s".formatted(core.getPrefix(), gameMode, ChatColor.translateAlternateColorCodes('&', core.getLuckPerms().getGroupManager().getGroup(core.getLuckPerms().getUserManager().getUser(target.getName()).getPrimaryGroup()).getCachedData().getMetaData().queryPrefix().result()), target.getName());
         player.sendMessage(formatted);
-        if (target.get() != player) target.get().sendMessage(formatted);
+        if (target != player) target.sendMessage(formatted);
     }
 }
